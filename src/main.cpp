@@ -48,6 +48,55 @@ void DrawCurrentState(sf::RenderWindow& screen, const std::vector<int>& list_dat
     screen.display();
 }
 
+int partition(std::vector<int>& list_data, int low, int high, sf::RenderWindow& screen){
+    int pivot = list_data[low];
+    int j = low;
+    for(int i = low + 1; i <= high; i++){
+        while (const auto event = screen.pollEvent()) {
+            if (event->is<sf::Event::Closed>()) { screen.close(); return -1; }
+            if (event->is<sf::Event::KeyPressed>()) {
+                if (event->getIf<sf::Event::KeyPressed>()->code == sf::Keyboard::Key::Escape) {
+                    screen.close(); return -1;
+                }
+            }
+        }
+        if (!screen.isOpen()) return -1;
+
+        DrawCurrentState(screen, list_data, j, i);
+
+
+        if(list_data[i] < pivot){
+            j++;
+            std::swap(list_data[i], list_data[j]);
+        }
+    }
+    std::swap(list_data[j], list_data[low]);
+    
+    return j;
+}
+
+void QuickSort_visualized(std::vector<int>& list_data, int low, int high, sf::RenderWindow& screen){
+    while (const auto event = screen.pollEvent()) {
+        if (event->is<sf::Event::Closed>()) { screen.close(); return; }
+        if (event->is<sf::Event::KeyPressed>()) {
+            if (event->getIf<sf::Event::KeyPressed>()->code == sf::Keyboard::Key::Escape) {
+                screen.close(); return;
+            }
+        }
+    }
+    if (!screen.isOpen()) return;
+    
+    if(low < high){
+        int pivot_index = partition(list_data, low, high, screen);
+
+        if (!screen.isOpen() || pivot_index == -1) return;
+
+        QuickSort_visualized(list_data, low, pivot_index - 1, screen);
+        QuickSort_visualized(list_data, pivot_index + 1, high, screen);
+    }
+
+}
+
 void merge(std::vector<int>& list_data, int left, int mid, int right, sf::RenderWindow& screen){
     int leftSize = mid - left + 1;
     int rightSize = right - mid;
@@ -82,7 +131,7 @@ void merge(std::vector<int>& list_data, int left, int mid, int right, sf::Render
 
         
         DrawCurrentState(screen, list_data, left + indexOfLeft, mid + 1 + indexOfRight);
-        DrawCurrentState(screen, list_data, indexOfLeft, indexOfRight);
+        //DrawCurrentState(screen, list_data, indexOfLeft, indexOfRight);
 
         if(leftArr[indexOfLeft] <= rightArr[indexOfRight]){
             list_data[indexOfMerged] = leftArr[indexOfLeft];
@@ -260,10 +309,6 @@ void bubble_sort_visualized(std::vector<int>& list_data, sf::RenderWindow& scree
         }
     }
 
-    for(int i = 0; i < n; i++){
-        
-        DrawCurrentState(screen, list_data, i, -1);
-    }
     
     if (screen.isOpen()) {
         DrawCurrentState(screen, list_data, -1, -1);
@@ -275,14 +320,15 @@ int main() {
     int sorting_choice;
     std::cout << "Enter the number of elements: ";
     std::cin >> n;
-    std::cout << "Select algorithm: \n1)Bubble Sort \n2)Selection Sort\n3)Insertion Sort\n4)Merge Sort\nChoice: ";
+    std::cout << "Select algorithm: \n1)Bubble Sort \n2)Selection Sort\n3)Insertion Sort\n4)Merge Sort\n5)Quick Sort\nChoice: ";
     std::cin >> sorting_choice;
 
     std::vector<int> my_list = random_list(n); 
 
    
     sf::RenderWindow screen(sf::VideoMode({1440, 900}), "Sorting",sf::Style::None, sf::State::Fullscreen);
-    screen.setFramerateLimit(100); 
+    screen.setFramerateLimit(100);
+    auto start = std::chrono::high_resolution_clock::now(); 
 
     switch(sorting_choice){
         case 1:
@@ -297,11 +343,20 @@ int main() {
         case 4:
             merge_sort_visualized(my_list, screen);
             break;
+        case 5:
+            QuickSort_visualized(my_list, 0, n - 1, screen);
+            break;
     }
 
-    for(int i = 0; i < n; i++){
+    for(int i = 0; i <= n; i++){
         DrawCurrentState(screen, my_list, i, -1);
     }
+
+    auto end = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+
+    std::cout << "Time taken: " << duration.count() << " milliseconds" << std::endl;
+
     
     //bubble_sort_visualized(my_list, screen);
     //selection_sort_visualized(my_list, screen);
@@ -325,7 +380,7 @@ int main() {
             }
         }
 
-        DrawCurrentState(screen, my_list, -1, -1);
+        //DrawCurrentState(screen, my_list, -1, -1);
     }
 
     return 0;
