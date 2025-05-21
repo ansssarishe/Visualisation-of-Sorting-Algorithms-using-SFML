@@ -48,6 +48,61 @@ void DrawCurrentState(sf::RenderWindow& screen, const std::vector<int>& list_dat
     screen.display();
 }
 
+void insertion_sort_visualized(std::vector<int>& list_data, sf::RenderWindow& screen){
+    int n = list_data.size();
+    for(int i = 1; i < n; i++){
+        int j = i;
+        while(j > 0 && list_data[j - 1] > list_data[j]){
+            while (const auto event = screen.pollEvent()) {
+                if (event->is<sf::Event::Closed>()) {
+                    screen.close();
+                    return;         
+                }
+                if (event->is<sf::Event::KeyPressed>()) {
+                if (event->getIf<sf::Event::KeyPressed>()->code == sf::Keyboard::Key::Escape) {
+                    screen.close();
+                    return;
+                }
+            }
+            }
+
+            if (!screen.isOpen()) return;
+
+            DrawCurrentState(screen, list_data, i, j);
+            sf::sleep(sf::microseconds(50));
+
+            std::swap(list_data[j], list_data[j - 1]);
+            j--;
+        }
+    }
+}
+
+void selection_sort_visualized(std::vector<int>& list_data, sf::RenderWindow& screen){
+    int n = list_data.size();
+    for(int i = 0; i < n; i++){
+        int min = i;
+        for(int j = i; j < n; j++){
+            while (const auto event = screen.pollEvent()) {
+                if (event->is<sf::Event::Closed>()) {
+                    screen.close();
+                    return;         
+                }
+                if (event->is<sf::Event::KeyPressed>()) {
+                if (event->getIf<sf::Event::KeyPressed>()->code == sf::Keyboard::Key::Escape) {
+                    screen.close();
+                    return;
+                }
+            }
+            }
+            if (!screen.isOpen()) return;
+
+            if(list_data[j] < list_data[min]) min = j;
+            DrawCurrentState(screen, list_data, i, j);
+            sf::sleep(sf::microseconds(50));
+        }
+        std::swap(list_data[i], list_data[min]);
+    }
+}
 
 void bubble_sort_visualized(std::vector<int>& list_data, sf::RenderWindow& screen) {
     bool swapped_in_pass;
@@ -95,14 +150,32 @@ void bubble_sort_visualized(std::vector<int>& list_data, sf::RenderWindow& scree
 }
 
 int main() {
+    int n;
+    int sorting_choice;
+    std::cout << "Enter the number of elements: ";
+    std::cin >> n;
+    std::cout << "Select algorithm: \n1)Bubble Sort \n2)Selection Sort\n3)Insertion Sort\nChoice: ";
+    std::cin >> sorting_choice;
 
-    int n = 200;
     std::vector<int> my_list = random_list(n); 
 
    
     sf::RenderWindow screen(sf::VideoMode({1440, 900}), "Sorting",sf::Style::None, sf::State::Fullscreen);
+
+    switch(sorting_choice){
+        case 1:
+            bubble_sort_visualized(my_list, screen);
+            break;
+        case 2:
+            selection_sort_visualized(my_list, screen);
+            break;
+        case 3:
+            insertion_sort_visualized(my_list, screen);
+            break;
+    }
     
-    bubble_sort_visualized(my_list, screen);
+    //bubble_sort_visualized(my_list, screen);
+    //selection_sort_visualized(my_list, screen);
     screen.setFramerateLimit(60); 
 
     while (screen.isOpen()) {
